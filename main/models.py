@@ -63,3 +63,45 @@ class Seat(models.Model):
 
     def __str__(self):
         return f"{self.section} - Row {self.row_number} Seat {self.seat_number}"
+    
+class Artist(models.Model):
+    artist_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100)
+    genre = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Event(models.Model):
+    event_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    event_datetime = models.DateTimeField()
+    event_title = models.CharField(max_length=200)
+    venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
+    organizer = models.ForeignKey(Organizer, on_delete=models.CASCADE)
+    artists = models.ManyToManyField(Artist, through="EventArtist")
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.event_title
+
+
+class EventArtist(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
+    role = models.CharField(max_length=100, blank=True)
+
+    class Meta:
+        unique_together = ("event", "artist")
+
+
+class TicketCategory(models.Model):
+    category_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    category_name = models.CharField(max_length=50)
+    quota = models.IntegerField()
+    price = models.DecimalField(max_digits=12, decimal_places=2)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="ticket_categories")
+
+    def __str__(self):
+        return self.category_name
+    

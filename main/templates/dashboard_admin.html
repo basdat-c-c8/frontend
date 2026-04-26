@@ -40,16 +40,14 @@ body {
   color: #cbd5e1;
 }
 
-.promo-btn {
-  background: white;
-  border: none;
-  border-radius: 20px;
-  padding: 10px 18px;
-  font-weight: bold;
-  cursor: pointer;
+.header-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.profile-btn {
+.profile-btn,
+.promo-btn {
   background: white;
   border: none;
   border-radius: 20px;
@@ -141,7 +139,6 @@ body {
 
 <div class="dashboard-container">
 
-  <!-- HEADER -->
   <div class="header-card">
     <div>
       <small>Administrator</small>
@@ -149,13 +146,13 @@ body {
       <p>Pantau dan kelola platform TikTakTuk</p>
     </div>
 
-    <div style="display:flex; gap:10px;">
+    <div class="header-actions">
       <a href="{% url 'main:profile' %}" class="profile-btn">Profil Saya</a>
+      <a href="{% url 'main:event_list' %}" class="profile-btn">Kelola Acara</a>
       <button class="promo-btn">Promosi</button>
     </div>
   </div>
 
-  <!-- STATS -->
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-title">Total Pengguna</div>
@@ -182,7 +179,6 @@ body {
     </div>
   </div>
 
-  <!-- INFO -->
   <div class="info-grid">
     <div class="info-card">
       <h3>Infrastruktur Venue</h3>

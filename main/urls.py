@@ -1,7 +1,7 @@
 from django.urls import path
 from main.views import (
     show_main, register, login_user, logout_user, choose_role,
-    venue_list, create_venue, update_venue, delete_venue, profile_view
+    venue_list, create_venue, update_venue, delete_venue, profile_view, event_list, create_event, update_event, browse_events
 )
 
 app_name = 'main'
@@ -22,4 +22,8 @@ urlpatterns = [
     path('venues/<uuid:id>/edit/', update_venue, name='update_venue'),
     path('venues/<uuid:id>/delete/', delete_venue, name='delete_venue'),
     path('profile/', profile_view, name='profile'),
+    path('events/', event_list, name='event_list'),
+    path('events/create/', create_event, name='create_event'),
+    path('events/<uuid:id>/edit/', update_event, name='update_event'),
+    path('browse-events/', browse_events, name='browse_events'),
 ]

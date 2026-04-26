@@ -7,8 +7,11 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 import datetime
 
+
 from main.forms import RegisterForm, VenueForm, ProfileUpdateForm
-from main.models import Role, AccountRole, Customer, Organizer, Venue
+from main.models import Role, AccountRole, Customer, Organizer, Venue, Event, Artist, TicketCategory
+from main.forms import RegisterForm, VenueForm, ProfileUpdateForm, EventForm
+from main.models import TicketCategory
 
 
 def get_user_role(user):
@@ -309,3 +312,98 @@ def profile_view(request):
     }
 
     return render(request, "profile.html", context)
+
+@login_required(login_url='/login')
+def event_list(request):
+    role = get_user_role(request.user)
+
+    events = Event.objects.all().order_by("-event_datetime")
+
+    context = {
+        "events": events,
+        "role": role,
+    }
+
+    return render(request, "event_list.html", context)
+
+
+@login_required(login_url='/login')
+def create_event(request):
+    role = get_user_role(request.user)
+
+    if role not in ["admin", "penyelenggara"]:
+        return redirect("main:show_main")
+
+    form = EventForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        event = form.save()
+
+        category_names = request.POST.getlist("category_name[]")
+        prices = request.POST.getlist("price[]")
+        quotas = request.POST.getlist("quota[]")
+
+        for i in range(len(category_names)):
+            if category_names[i] and prices[i] and quotas[i]:
+                TicketCategory.objects.create(
+                    event=event,
+                    category_name=category_names[i],
+                    price=prices[i],
+                    quota=quotas[i]
+                )
+
+        return redirect("main:event_list")
+
+    return render(request, "event_form.html", {
+        "form": form,
+        "title": "Buat Acara Baru",
+        "button_text": "Buat Acara",
+    })
+
+@login_required(login_url='/login')
+def update_event(request, id):
+    event = get_object_or_404(Event, pk=id)
+
+    role = get_user_role(request.user)
+    if role not in ["admin", "penyelenggara"]:
+        return redirect("main:show_main")
+
+    form = EventForm(request.POST or None, instance=event)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        return redirect("main:event_list")
+
+    return render(request, "event_form.html", {
+        "form": form,
+        "title": "Edit Acara",
+        "button_text": "Simpan",
+    })
+
+@login_required(login_url='/login')
+def browse_events(request):
+    q = request.GET.get("q", "")
+    venue_id = request.GET.get("venue", "")
+    artist_id = request.GET.get("artist", "")
+
+    events = Event.objects.all().order_by("-event_datetime")
+
+    if q:
+        events = events.filter(event_title__icontains=q)
+
+    if venue_id:
+        events = events.filter(venue__venue_id=venue_id)
+
+    if artist_id:
+        events = events.filter(artists__artist_id=artist_id)
+
+    context = {
+        "events": events,
+        "venues": Venue.objects.all(),
+        "artists": Artist.objects.all(),
+        "q": q,
+        "selected_venue": venue_id,
+        "selected_artist": artist_id,
+    }
+
+    return render(request, "browse_events.html", context)

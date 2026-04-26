@@ -3,6 +3,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from main.models import Venue
 from django.contrib.auth.forms import PasswordChangeForm
+from main.models import Event, Artist, TicketCategory
+
 
 
 
@@ -61,3 +63,20 @@ class ProfileUpdateForm(forms.Form):
         label="Email",
         widget=forms.EmailInput(attrs={"placeholder": "Email"})
     )
+
+class EventForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = ["event_title", "event_datetime", "venue", "organizer", "artists", "description"]
+        widgets = {
+            "event_title": forms.TextInput(attrs={"placeholder": "cth. Konser Melodi Senja"}),
+            "event_datetime": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "description": forms.Textarea(attrs={"placeholder": "Deskripsi acara...", "rows": 4}),
+            "artists": forms.CheckboxSelectMultiple(),
+        }
+
+
+class TicketCategoryForm(forms.ModelForm):
+    class Meta:
+        model = TicketCategory
+        fields = ["category_name", "quota", "price"]
